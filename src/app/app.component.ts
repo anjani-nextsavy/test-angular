@@ -9,6 +9,7 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  title = 'test-angular';
   showAlert() {
     alert('Button clicked!');
   }
