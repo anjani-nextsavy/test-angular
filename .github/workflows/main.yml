@@ -32,4 +32,4 @@ jobs:
       run: ng build
 
     - name: Run tests
-      run: ng test --watch=false --browsers=ChromeHeadless --karma-config=karma.conf.ci.js
+      run: ng test --watch=false --browsers=ChromeHeadless
