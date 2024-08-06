@@ -64,6 +64,7 @@
 #           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
 #         run: |
 #           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+
 name: CI
 
 on:
@@ -104,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: dist/test-angular/
+          path: dist/
 
   deploy:
     needs: build
@@ -116,12 +117,8 @@ jobs:
         with:
           name: dist
 
-      - name: List contents of downloaded artifact directory
-        run: |
-          echo "Root directory contents:"
-          ls -R /home/runner/work/test-angular/test-angular || echo "No files found"
-          echo "Checking for dist/test-angular in downloaded directory:"
-          ls -R /home/runner/work/test-angular/test-angular/dist || echo "No dist directory found"
+      - name: List contents of dist directory after download
+        run: ls -R dist/test-angular || echo "No artifacts found"
 
       - name: Add SSH key to known_hosts
         run: |
@@ -134,6 +131,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          echo "Attempting to deploy..."
-          ls -R /home/runner/work/test-angular/test-angular/dist/test-angular || echo "No build artifacts found for deployment"
-          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
