@@ -33,7 +33,9 @@ jobs:
         run: ng build
 
       - name: List build directory
-        run: ls -l dist
+        run: |
+          ls -l dist
+          ls -l dist/test-angular
 
       - name: Run tests
         run: ng test --watch=false --browsers=ChromeHeadless
