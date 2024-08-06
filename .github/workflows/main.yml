@@ -96,16 +96,16 @@ jobs:
         run: npm install -g @angular/cli
 
       - name: Build the project
-        run: npm run build
-
-      - name: List contents of dist directory
-        run: ls -R dist
+        run: |
+          npm run build
+          echo "Build complete. Listing contents of dist directory:"
+          ls -R dist/test-angular
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: dist/
+          path: dist/test-angular/
 
   deploy:
     needs: build
@@ -118,7 +118,7 @@ jobs:
           name: dist
 
       - name: List contents of dist directory after download
-        run: ls -R dist
+        run: ls -R dist/test-angular
 
       - name: Add SSH key to known_hosts
         run: |
@@ -131,4 +131,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r dist/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
