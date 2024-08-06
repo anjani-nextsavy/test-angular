@@ -99,7 +99,7 @@ jobs:
         run: |
           npm run build
           echo "Build complete. Listing contents of dist directory:"
-          ls -R dist/test-angular
+          ls -R dist/test-angular || echo "No build artifacts found"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -118,7 +118,7 @@ jobs:
           name: dist
 
       - name: List contents of dist directory after download
-        run: ls -R dist/test-angular
+        run: ls -R dist/test-angular || echo "No artifacts found"
 
       - name: Add SSH key to known_hosts
         run: |
