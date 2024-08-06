@@ -36,6 +36,12 @@ jobs:
         run: ng test --watch=false --browsers=ChromeHeadless
         # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
   deploy:
     needs: build # Ensures that the 'build' job completes successfully before this job starts
     runs-on: ubuntu-latest
@@ -51,6 +57,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
 
       - name: Add SSH key to known_hosts
         run: |
