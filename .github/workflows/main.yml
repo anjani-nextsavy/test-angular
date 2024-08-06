@@ -117,8 +117,11 @@ jobs:
         with:
           name: dist
 
+      - name: List contents of root directory after download
+        run: ls -R /home/runner/work/test-angular/test-angular || echo "No files found"
+
       - name: List contents of dist directory after download
-        run: ls -R dist/test-angular || echo "No artifacts found"
+        run: ls -R /home/runner/work/test-angular/test-angular/dist/test-angular || echo "No build artifacts found for deployment"
 
       - name: Add SSH key to known_hosts
         run: |
@@ -131,4 +134,6 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          echo "Attempting to deploy..."
+          ls -R /home/runner/work/test-angular/test-angular/dist/test-angular || echo "No build artifacts found for deployment"
+          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
