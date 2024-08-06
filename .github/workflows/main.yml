@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: 
+    branches:
       - master
 
 jobs:
@@ -15,49 +15,48 @@ jobs:
         node-version: [18.x, 20.x]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Install Angular CLI
-      run: npm install -g @angular/cli
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
 
-    - name: Build the project
-      run: ng build
+      - name: Build the project
+        run: ng build
 
-    - name: Run tests
-      run: ng test --watch=false --browsers=ChromeHeadless
-      # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
+      - name: Run tests
+        run: ng test --watch=false --browsers=ChromeHeadless
+        # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
 
+  deploy:
+    needs: build # Ensures that the 'build' job completes successfully before this job starts
+    runs-on: ubuntu-latest
 
-      # deploy:
-      #   needs: build  # Ensures that the 'build' job completes successfully before this job starts
-      #   runs-on: ubuntu-latest
-    
-      #   steps:
-      #   - name: Checkout repository 
-      #     uses: actions/checkout@v3
-    
-      #   - name: Set up Node.js
-      #     uses: actions/setup-node@v3
-      #     with:
-      #       node-version: ${{ matrix.node-version }}
-    
-      #   - name: Install dependencies
-      #     run: npm install
-    
-      #   - name: Deploy to Staging
-      #     env:
-      #       STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
-      #       STAGING_USER: ${{ secrets.STAGING_USER }}
-      #       STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-      #     run: |
-      #       # Assuming the build output is in the 'dist/' directory
-      #       scp -r -i $STAGING_SSH_KEY dist/* $STAGING_USER@$STAGING_SERVER:/path/to/staging
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Staging
+        env:
+          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        run: |
+          # Assuming the build output is in the 'dist/' directory
+          scp -r -i $STAGING_SSH_KEY dist/* $STAGING_USER@$STAGING_SERVER:/htdocs/angular
