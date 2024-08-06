@@ -52,9 +52,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
-
+      - name: Add SSH key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
+  
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
@@ -62,5 +64,3 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
           sshpass -p $STAGING_PASSWORD scp -r dist/* $STAGING_USER@$STAGING_SERVER:/public_html/angular
-
-          
