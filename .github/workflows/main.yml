@@ -11,8 +11,8 @@ jobs:
 
     strategy:
       matrix:
-        # node-version: [20.x]
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
+        # node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
@@ -52,17 +52,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Add SSH key
-        run: |
-          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
-
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
-          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          scp -r -i $STAGING_SSH_KEY dist/* $STAGING_USER@$STAGING_SERVER:/public_html/angular
+          scp -r -i $STAGING_PASSWORD dist/* $STAGING_USER@$STAGING_SERVER:/public_html/angular
 
