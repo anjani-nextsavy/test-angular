@@ -30,7 +30,7 @@ jobs:
         run: npm install -g @angular/cli
 
       - name: Build the project
-        run: ng build
+        run: npm run build
 
       - name: List build directory
         run: |
