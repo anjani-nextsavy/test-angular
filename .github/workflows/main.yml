@@ -58,5 +58,5 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
         run: |
-          # Assuming the build output is in the 'htdocs/angular/' directory
-          scp -r -i $STAGING_SSH_KEY htdocs/angular/* $STAGING_USER@$STAGING_SERVER:/htdocs/angular
+          scp -r -i $STAGING_SSH_KEY dist/* $STAGING_USER@$STAGING_SERVER:/htdocs/angular
+
