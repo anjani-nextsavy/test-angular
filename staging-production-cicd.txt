@@ -1,0 +1,90 @@
+Example GitHub Actions Workflow for Staging and Production
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: 
+      - master
+      - staging
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Install Angular CLI
+      run: npm install -g @angular/cli
+
+    - name: Build the project
+      run: ng build
+
+    - name: Run tests
+      run: ng test --watch=false --browsers=ChromeHeadless
+
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/staging' # Only run this job for the staging branch
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Deploy to Staging
+      env:
+        STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+        STAGING_USER: ${{ secrets.STAGING_USER }}
+        STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+      run: |
+        # Assuming the build output is in the 'dist/' directory
+        scp -r -i $STAGING_SSH_KEY dist/* $STAGING_USER@$STAGING_SERVER:/path/to/staging
+
+  deploy-production:
+    needs: build
+    if: github.ref == 'refs/heads/master' # Only run this job for the master branch
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Deploy to Production
+      env:
+        PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
+        PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      run: |
+        # Assuming the build output is in the 'dist/' directory
+        scp -r -i $PRODUCTION_SSH_KEY dist/* $PRODUCTION_USER@$PRODUCTION_SERVER:/path/to/production
