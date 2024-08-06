@@ -52,11 +52,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          scp -r -i $STAGING_PASSWORD dist/* $STAGING_USER@$STAGING_SERVER:/public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r dist/* $STAGING_USER@$STAGING_SERVER:/public_html/angular
 
+          
