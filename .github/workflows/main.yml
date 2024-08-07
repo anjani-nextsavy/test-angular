@@ -1,12 +1,86 @@
+# name: CI/CD for Angular App
+
+# on:
+#   push:
+#     branches:
+#       - staging
+#       - master  
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         node-version: [20.x]
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node-version }}
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Install Angular CLI
+#         run: npm install -g @angular/cli
+
+#       - name: Build the project
+#         run: npm run build --if-present
+
+#       - name: Modify index.html
+#         run: |
+#           sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+
+#       - name: Upload build artifacts
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: build-artifacts
+#           path: dist/test-angular/
+
+#   deploy:
+#     needs: build
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Download build artifacts
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: build-artifacts
+#           path: /home/runner/work/test-angular/dist/test-angular/
+
+#       - name: Add SSH key to known_hosts
+#         run: |
+#           mkdir -p ~/.ssh
+#           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
+
+#       - name: Deploy to Staging
+#         env:
+#           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+#           STAGING_USER: ${{ secrets.STAGING_USER }}
+#           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+#         run: |
+#           sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+
+
 name: CI/CD for Angular App
 
 on:
   push:
     branches:
       - staging
+      - master
 
 jobs:
-  build:
+  build-staging:
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
 
     strategy:
@@ -32,8 +106,7 @@ jobs:
         run: npm run build --if-present
 
       - name: Modify index.html
-        run: |
-          sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+        run: sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -41,8 +114,9 @@ jobs:
           name: build-artifacts
           path: dist/test-angular/
 
-  deploy:
-    needs: build
+  deploy-staging:
+    needs: build-staging
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
 
     steps:
@@ -60,10 +134,6 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
 
-      - name: Verify SSH Key
-        run: | 
-          ssh-keyscan -H ${{ secrets.STAGING_SERVER }}
-
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
@@ -71,3 +141,66 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
           sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+
+  build-master:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+
+      - name: Build the project
+        run: npm run build --if-present
+
+      - name: Modify index.html
+        run: sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/test-angular/
+
+  deploy-master:
+    needs: build-master
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: /home/runner/work/test-angular/dist/test-angular/
+
+      - name: Add SSH key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.MASTER_SERVER }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Production
+        env:
+          MASTER_SERVER: ${{ secrets.MASTER_SERVER }}
+          MASTER_USER: ${{ secrets.MASTER_USER }}
+          MASTER_PASSWORD: ${{ secrets.MASTER_PASSWORD }}
+        run: |
+          sshpass -p $MASTER_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $MASTER_USER@$MASTER_SERVER:public_html/angular-prod
