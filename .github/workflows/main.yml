@@ -64,7 +64,6 @@
 #           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
 #         run: |
 #           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
-
 name: CI/CD for Angular App
 
 on:
@@ -108,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: dist/test-angular/
+          path: dist/test-angular/*  # Ensure this path only includes build artifacts
 
   deploy:
     needs: build
