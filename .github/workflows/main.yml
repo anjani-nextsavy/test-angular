@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: dist/test-angular  # Ensure this path includes only the build artifacts directory
+          path: dist/test-angular/  # Ensure this path only includes the build artifacts
 
   deploy:
     needs: build
@@ -121,9 +121,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
+          path: /home/runner/work/test-angular/dist/test-angular/  # Ensure this is the correct path
 
       - name: List downloaded directory
-        run: ls -la /home/runner/work/test-angular/test-angular
+        run: ls -la /home/runner/work/test-angular/dist/test-angular/
 
       - name: Add SSH key to known_hosts
         run: |
@@ -136,4 +137,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
