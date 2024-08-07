@@ -102,6 +102,10 @@ jobs:
       - name: List build directory
         run: ls -la dist/test-angular/
 
+      - name: List build directory contents before deployment
+        run: find dist/test-angular/
+
+
       - name: Run tests
         run: ng test --watch=false --browsers=ChromeHeadless
         # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
