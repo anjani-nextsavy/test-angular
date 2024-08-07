@@ -1,41 +1,39 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- landing-page.component.html -->
 
+<header>
+  <nav>
+    <div class="logo">MyBrand</div>
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
 
+<section class="hero">
+  <h1>Welcome to MyBrand</h1>
+  <p>Your one-stop solution for everything.</p>
+  <a href="#contact" class="cta-button">Get Started</a>
+</section>
 
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-<div class="container">
-  <h1>Welcome to My Simple Angular Site</h1>
-  <p>This is a simple Angular single-page application.</p>
-  <button (click)="showAlert()">Click Me</button>
-  <div>
-    new testing added to check
+<section id="features" class="features">
+  <div class="feature">
+    <img src="assets/feature-1.jpg" alt="Feature One">
+    <h2>Feature One</h2>
+    <p>Description of feature one.</p>
   </div>
-  <h3>master</h3>
-  <h1>
-    test for webhook set
-  </h1>
-  <h2>
-    added h2 for webhook check
-  </h2>
-  <h1>
-    webhook
-  </h1>
-  <h4>pipeline checking</h4>
-  changes
-</div>
+  <div class="feature">
+    <img src="assets/feature-2.png" alt="Feature Two">
+    <h2>Feature Two</h2>
+    <p>Description of feature two.</p>
+  </div>
+  <div class="feature">
+    <img src="assets/feature-3.png" alt="Feature Three">
+    <h2>Feature Three</h2>
+    <p>Description of feature three.</p>
+  </div>
+</section>
 
-<router-outlet />
+<footer id="contact">
+  <p>&copy; 2024 MyBrand. All rights reserved.</p>
+</footer>
