@@ -35,17 +35,11 @@ jobs:
         run: |
           sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
 
-      - name: List build directory
-        run: ls -la dist/test-angular/
-
-      - name: List build directory contents before deployment
-        run: find dist/test-angular/
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: dist/test-angular/ # Ensure this path only includes the build artifacts
+          path: dist/test-angular/
 
   deploy:
     needs: build
@@ -59,15 +53,16 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
-          path: /home/runner/work/test-angular/dist/test-angular/ # Ensure this is the correct path
-
-      - name: List downloaded directory
-        run: ls -la /home/runner/work/test-angular/dist/test-angular/
+          path: /home/runner/work/test-angular/dist/test-angular/
 
       - name: Add SSH key to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
+
+      - name: Verify SSH Key
+        run: | 
+          ssh-keyscan -H ${{ secrets.STAGING_SERVER }}
 
       - name: Deploy to Staging
         env:
