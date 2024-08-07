@@ -64,7 +64,6 @@
 #           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
 #         run: |
 #           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
-
 name: CI/CD for Angular App
 
 on:
@@ -96,13 +95,20 @@ jobs:
         run: npm install -g @angular/cli
 
       - name: Build the project
-        run: npm run build
+        run: npm run build --if-present
 
       - name: List build directory
         run: ls -la dist/test-angular/
 
       - name: List build directory contents before deployment
         run: find dist/test-angular/
+
+      # Upload the build artifacts to be used in the deploy job
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/test-angular/
 
   deploy:
     needs: build
@@ -111,6 +117,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
