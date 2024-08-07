@@ -33,7 +33,7 @@ jobs:
 
       - name: Modify index.html
         run: |
-          sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+          sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -66,4 +66,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
