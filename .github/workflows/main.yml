@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: dist/test-angular/*  # Ensure this path only includes build artifacts
+          path: dist/test-angular  # Ensure this path includes only the build artifacts directory
 
   deploy:
     needs: build
