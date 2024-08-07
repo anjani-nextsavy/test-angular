@@ -133,4 +133,5 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/browser/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+
