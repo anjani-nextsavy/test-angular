@@ -105,7 +105,6 @@ jobs:
       - name: List build directory contents before deployment
         run: find dist/test-angular/
 
-
       - name: Run tests
         run: ng test --watch=false --browsers=ChromeHeadless
         # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
@@ -130,7 +129,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
-  
+
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
@@ -138,4 +137,3 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/browser/* $STAGING_USER@$STAGING_SERVER:public_html/angular
-
