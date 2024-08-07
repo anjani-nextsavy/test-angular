@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: dist/test-angular/
+          path: dist/test-angular/browser
 
   deploy:
     needs: build
@@ -53,7 +53,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
-          path: /home/runner/work/test-angular/dist/test-angular/
+          path: /home/runner/work/test-angular/dist/test-angular/browser
 
       - name: Add SSH key to known_hosts
         run: |
@@ -66,4 +66,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/browser* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
