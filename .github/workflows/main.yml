@@ -1,70 +1,3 @@
-# name: CI
-
-# on:
-#   push:
-#     branches:
-#       - master
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     strategy:
-#       matrix:
-#         node-version: [20.x]
-#         # node-version: [18.x, 20.x]
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: ${{ matrix.node-version }}
-
-#       - name: Install dependencies
-#         run: npm install
-
-#       - name: Install Angular CLI
-#         run: npm install -g @angular/cli
-
-#       - name: Build the project
-#         run: npm run build
-
-#       - name: Run tests
-#         run: ng test --watch=false --browsers=ChromeHeadless
-#         # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
-
-#   deploy:
-#     needs: build # Ensures that the 'build' job completes successfully before this job starts
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: ${{ matrix.node-version }}
-
-#       - name: Install dependencies
-#         run: npm install
-
-#       - name: Add SSH key to known_hosts
-#         run: |
-#           mkdir -p ~/.ssh
-#           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
-  
-#       - name: Deploy to Staging
-#         env:
-#           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
-#           STAGING_USER: ${{ secrets.STAGING_USER }}
-#           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-#         run: |
-#           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
-
 name: CI
 
 on:
@@ -79,6 +12,7 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
+        # node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
@@ -96,35 +30,33 @@ jobs:
         run: npm install -g @angular/cli
 
       - name: Build the project
-        run: |
-          npm run build
-          echo "Build complete. Listing contents of dist directory:"
-          ls -R dist/test-angular || echo "No build artifacts found"
+        run: npm run build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: dist/test-angular/
+      - name: Run tests
+        run: ng test --watch=false --browsers=ChromeHeadless
+        # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
 
   deploy:
-    needs: build
+    needs: build # Ensures that the 'build' job completes successfully before this job starts
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: List contents of dist directory after download
-        run: ls -R dist/test-angular || echo "No artifacts found"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Add SSH key to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
-
+  
       - name: Deploy to Staging
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
