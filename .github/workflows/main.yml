@@ -64,6 +64,7 @@
 #           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
 #         run: |
 #           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+
 name: CI/CD for Angular App
 
 on:
@@ -103,7 +104,6 @@ jobs:
       - name: List build directory contents before deployment
         run: find dist/test-angular/
 
-      # Upload the build artifacts to be used in the deploy job
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -123,13 +123,8 @@ jobs:
         with:
           name: build-artifacts
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm install
+      - name: List downloaded directory
+        run: ls -la /home/runner/work/test-angular/test-angular
 
       - name: Add SSH key to known_hosts
         run: |
@@ -142,4 +137,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
