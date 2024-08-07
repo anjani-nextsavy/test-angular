@@ -31,9 +31,9 @@ jobs:
       - name: Build the project
         run: npm run build --if-present
 
-      # - name: Modify index.html
-      #   run: |
-      #     sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+      - name: Modify index.html
+        run: |
+          sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
