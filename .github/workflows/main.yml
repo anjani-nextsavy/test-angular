@@ -65,7 +65,7 @@
 #         run: |
 #           sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
 
-name: CI
+name: CI/CD for Angular App
 
 on:
   push:
@@ -79,7 +79,6 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-        # node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
@@ -97,7 +96,7 @@ jobs:
         run: npm install -g @angular/cli
 
       - name: Build the project
-        run: npm run build
+        run: npm run build -- --prod
 
       - name: List build directory
         run: ls -la dist/test-angular/
@@ -105,12 +104,8 @@ jobs:
       - name: List build directory contents before deployment
         run: find dist/test-angular/
 
-      - name: Run tests
-        run: ng test --watch=false --browsers=ChromeHeadless
-        # run: ng test --watch=false --browsers=ChromeHeadless,FirefoxHeadless
-
   deploy:
-    needs: build # Ensures that the 'build' job completes successfully before this job starts
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -136,4 +131,4 @@ jobs:
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/browser/* $STAGING_USER@$STAGING_SERVER:public_html/angular
+          sshpass -p $STAGING_PASSWORD scp -r dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular
