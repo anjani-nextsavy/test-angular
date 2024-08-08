@@ -81,7 +81,7 @@ jobs:
         #   sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
         run: |
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
-            sshpass -p $PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $USER@$SERVER:public_html/angular-staging
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            sshpass -p $PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $USER@$SERVER:public_html/angular-prod
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
