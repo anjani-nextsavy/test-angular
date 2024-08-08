@@ -31,9 +31,17 @@ jobs:
       - name: Build the project
         run: npm run build --if-present
 
-      - name: Modify index.html
+      # - name: Modify index.html
+      #   run: |
+      #     sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+
+      - name: Modify index.html based on branch
         run: |
-          sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -55,6 +63,9 @@ jobs:
           name: build-artifacts
           path: /home/runner/work/test-angular/dist/test-angular/
 
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
       - name: Add SSH key to known_hosts
         run: |
           mkdir -p ~/.ssh
@@ -65,5 +76,11 @@ jobs:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+        # run: |
+        #   sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
         run: |
-          sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
+          fi
