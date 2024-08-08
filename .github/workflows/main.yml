@@ -29,6 +29,9 @@ jobs:
       - name: Install Angular CLI
         run: npm install -g @angular/cli
 
+      - name: Run form validation tests
+        run: npm run test -- --no-watch --code-coverage
+
       - name: Build the project
         run: npm run build --if-present
 
