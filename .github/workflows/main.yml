@@ -1,12 +1,8 @@
 name: CI/CD for Angular App
 
 on:
-  push:
-    branches:
-      - staging
-      - master
   schedule:
-    - cron: '*/5 * * * *'  # every 5 minutes
+    - cron: '*/2 * * * *' # Runs every 2 minutes
 
 jobs:
   build:
@@ -36,9 +32,12 @@ jobs:
 
       - name: Modify index.html based on branch
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+          # Check if we're on a scheduled run
+          # Here you might want to set a default branch or fetch some condition
+          BRANCH_NAME="staging"  # Change this to the branch you want to build
+          if [ "$BRANCH_NAME" == "staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
-          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+          elif [ "$BRANCH_NAME" == "master" ]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
           fi
 
@@ -77,8 +76,9 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
        
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+          BRANCH_NAME="staging"  # Change this to the branch you want to deploy
+          if [ "$BRANCH_NAME" == "staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
-          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+          elif [ "$BRANCH_NAME" == "master" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
