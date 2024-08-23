@@ -2,24 +2,23 @@ name: CI/CD for Angular App
 
 on:
   schedule:
-    - cron: '*/2 * * * *' # Runs every 2 minutes
+    - cron: '*/5 * * * *'  # Runs every 2 minutes
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Print Current Date and Time
+        run: date
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20.x'
 
       - name: Install dependencies
         run: npm install
@@ -32,9 +31,8 @@ jobs:
 
       - name: Modify index.html based on branch
         run: |
-          # Check if we're on a scheduled run
-          # Here you might want to set a default branch or fetch some condition
-          BRANCH_NAME="staging"  # Change this to the branch you want to build
+          # Define branch name for demonstration
+          BRANCH_NAME="staging"  # Change as needed for testing
           if [ "$BRANCH_NAME" == "staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
           elif [ "$BRANCH_NAME" == "master" ]; then
@@ -76,7 +74,8 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
        
         run: |
-          BRANCH_NAME="staging"  # Change this to the branch you want to deploy
+          # Define branch name for demonstration
+          BRANCH_NAME="staging"  # Change as needed for testing
           if [ "$BRANCH_NAME" == "staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
           elif [ "$BRANCH_NAME" == "master" ]; then
