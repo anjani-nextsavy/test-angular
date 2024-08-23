@@ -1,26 +1,32 @@
 name: CI/CD for Angular App
 
 on:
-  workflow_dispatch:  # Manual trigger
+  push:
+    branches:
+      - staging
+      - master
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
-
+    # Schedule runs for staging and master branches
+    - cron: '*/5 * * * *' # Runs every 5 minutes
+    # Add condition to run scheduled job only for specific branches
+    # using `if` condition in the job steps.
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print Current Date and Time
-        run: date
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: npm install
@@ -33,11 +39,9 @@ jobs:
 
       - name: Modify index.html based on branch
         run: |
-          # Define branch name for demonstration
-          BRANCH_NAME="staging"  # Change as needed for testing
-          if [ "$BRANCH_NAME" == "staging" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
-          elif [ "$BRANCH_NAME" == "master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
           fi
 
@@ -76,10 +80,45 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
        
         run: |
-          # Define branch name for demonstration
-          BRANCH_NAME="staging"  # Change as needed for testing
-          if [ "$BRANCH_NAME" == "staging" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
-          elif [ "$BRANCH_NAME" == "master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
+          fi
+
+  schedule:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build the project
+        run: npm run build --if-present
+
+      - name: Modify index.html based on branch
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/test-angular/
+
+      - name: Deploy to Server
+        env:
+          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+       
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
