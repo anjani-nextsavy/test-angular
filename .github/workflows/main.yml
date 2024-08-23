@@ -2,27 +2,29 @@ name: CI/CD for Angular App
 
 on:
   push:
-      branches:
-        - staging
-        - master
+    branches:
+      - staging
+      - master
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 2 minutes
+    # Runs every 5 minutes
+    - cron: '*/5 * * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print Current Date and Time
-        run: date
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: npm install
@@ -35,13 +37,11 @@ jobs:
 
       - name: Modify index.html based on branch
         run: |
-          BRANCH_NAME="${{ github.ref }}"  # Get the branch name dynamically
-          BRANCH_NAME="${BRANCH_NAME##*/}" # Extract branch name from ref
-          if [ "$BRANCH_NAME" == "staging" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
-          elif [ "$BRANCH_NAME" == "master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
-          fi      
+          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -78,10 +78,8 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
        
         run: |
-          BRANCH_NAME="${{ github.ref }}"  # Get the branch name dynamically
-          BRANCH_NAME="${BRANCH_NAME##*/}" # Extract branch name from ref
-          if [ "$BRANCH_NAME" == "staging" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
-          elif [ "$BRANCH_NAME" == "master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
