@@ -35,13 +35,13 @@ jobs:
 
       - name: Modify index.html based on branch
         run: |
-          # Define branch name for demonstration
-          BRANCH_NAME="staging"  # Change as needed for testing
+          BRANCH_NAME="${{ github.ref }}"  # Get the branch name dynamically
+          BRANCH_NAME="${BRANCH_NAME##*/}" # Extract branch name from ref
           if [ "$BRANCH_NAME" == "staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
           elif [ "$BRANCH_NAME" == "master" ]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
-          fi
+          fi      
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -78,8 +78,8 @@ jobs:
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
        
         run: |
-          # Define branch name for demonstration
-          BRANCH_NAME="staging"  # Change as needed for testing
+          BRANCH_NAME="${{ github.ref }}"  # Get the branch name dynamically
+          BRANCH_NAME="${BRANCH_NAME##*/}" # Extract branch name from ref
           if [ "$BRANCH_NAME" == "staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
           elif [ "$BRANCH_NAME" == "master" ]; then
