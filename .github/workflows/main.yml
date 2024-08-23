@@ -5,6 +5,8 @@ on:
     branches:
       - staging
       - master
+    tags:
+      - "v1.0.0"
 
 jobs:
   build:
@@ -37,6 +39,8 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
           fi
 
@@ -78,5 +82,7 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
