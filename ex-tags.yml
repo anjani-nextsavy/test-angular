@@ -5,11 +5,11 @@ on:
     branches:
       - staging
       - master
-  pull_request:
-    branches:
-      - staging
-      - master
-
+    tags:
+      - "v*1.*.*"  # Trigger for all version tags like v1.0.0, v2.1.0, etc.
+      # - "v1.0.0"
+      # commands to run tags -(git tag v1.0.0)
+      # - (git push origin v1.0.0)        
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,6 +27,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Check Trigger Source
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "Triggered by a tag: ${GITHUB_REF}"
+          else
+            echo "Triggered by a branch: ${GITHUB_REF}"
+          fi
+
       - name: Install dependencies
         run: npm install
 
@@ -36,11 +44,13 @@ jobs:
       - name: Build the project
         run: npm run build --if-present
 
-      - name: Modify index.html based on branch or PR
+      - name: Modify index.html based on branch or tag
         run: |
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
             sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
           fi
 
@@ -53,7 +63,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' # Ensure deployment only on push events, not pull requests
 
     steps:
       - name: Checkout repository
@@ -73,7 +82,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server
+      - name: Deploy to appropriate environment
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
@@ -81,6 +90,6 @@ jobs:
         run: |
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
-          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ] || [[ "${{ github.ref }}" == refs/tags/* ]]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
           fi
