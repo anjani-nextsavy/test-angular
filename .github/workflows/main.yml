@@ -67,7 +67,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Staging
+      - name: Deploy to Server
         env:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
