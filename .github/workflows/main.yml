@@ -1,7 +1,10 @@
 name: CI/CD for Angular App
 
 on:
-  workflow_dispatch: # Allows manual triggering of the workflow
+  push:
+    branches:
+      - staging
+      - master
 
 jobs:
   build:
@@ -70,7 +73,7 @@ jobs:
           STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-
+       
         run: |
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
             sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
