@@ -33,9 +33,9 @@ jobs:
       - name: Copy environment file
         run: |
           if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
-            cp env/staging src/environments/environment.ts
+            cp env/staging src/environments/environment.staging.ts
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            cp env/prod src/environments/environment.ts
+            cp env/prod src/environments/environment.prod.ts
           fi
 
       - name: Build the project
