@@ -1,0 +1,96 @@
+name: CI/CD for Angular App
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+  push:
+    branches:
+      - staging
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+
+      - name: Copy environment file
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            cp env/staging src/environments/environment.ts
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            cp env/prod src/environments/environment.ts
+          fi
+
+      - name: Build the project
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            npm run build --configuration staging
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            npm run build --configuration production
+          fi
+
+      - name: Modify index.html based on branch
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-staging/">|g' dist/test-angular/index.html
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sed -i 's|<base href="/">|<base href="/angular-prod/">|g' dist/test-angular/index.html
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/test-angular/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: /home/runner/work/test-angular/dist/test-angular/
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Add SSH key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.STAGING_SERVER }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        env:
+          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+       
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-staging
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            sshpass -p $STAGING_PASSWORD scp -r /home/runner/work/test-angular/dist/test-angular/* $STAGING_USER@$STAGING_SERVER:public_html/angular-prod
+          fi
