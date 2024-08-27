@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API Data</title>
+</head>
+<body>
+    <h1>Fetch API Data Example</h1>
+    <div id="data-container"></div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const apiUrl = 'https://www.nextsavy.com/wp-json';
+    const dataContainer = document.getElementById('data-container');
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data); // Log the data for inspection
+            displayData(data);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            dataContainer.innerHTML = '<p>Failed to load data. Please try again later.</p>';
+        });
+
+    function displayData(data) {
+        // Example of displaying some data from the API
+        if (data) {
+            const content = `
+                <h2>Website Information</h2>
+                <p><strong>Site Name:</strong> ${data.name}</p>
+                <p><strong>Description:</strong> ${data.description}</p>
+                <p><strong>URL:</strong> <a href="${data.url}" target="_blank">${data.url}</a></p>
+            `;
+            dataContainer.innerHTML = content;
+        } else {
+            dataContainer.innerHTML = '<p>No data available.</p>';
+        }
+    }
+});
+
+    </script>
+</body>
+</html>
